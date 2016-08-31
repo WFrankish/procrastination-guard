@@ -2,7 +2,22 @@
   "manifest_version": 2,
   "name": "Procrastination Guard",
   "version": "0.1",
-
   "description": "Blocks specified websites, or only allows access to specified websites, in order to avoid procrastination.",
   "homepage_url": "https://github.com/WFrankish/procrastination-guard.git",
+  
+  "background": {
+    "scripts": ["background.js"]
+  },
+  
+  "browser_action": {
+    "default_title": "Procrastination Guard - Enable work mode"
+  },
+  
+  "options_ui": {
+    "page": "options.html"
+  },
+  
+  "permissions": [
+    "tabs"
+  ]
 }
