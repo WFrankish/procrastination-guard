@@ -1,0 +1,50 @@
+* {
+  box-sizing: border-box;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+[class*="col-"] {
+  float: left;
+}
+.pad{
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.padbottom{
+  padding-bottom: 10px;
+}
+.padradio{
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.padall{
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+}
+html {
+  color: #0c0c0c;
+  font-family: Fira Sans,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Droid Sans,Helvetica Neue,sans-serif
+}
+body{
+  padding: 0;
+  margin: 0;
+}
+
+/* Mobile Screens */
+[class*="col-"] {
+  width: 100%;
+}
+@media only screen and (min-width: 600px) {
+  .col-l {width: 35%;}
+  .col-r {width: 65%;}
+  .col-f {
+    width: 100%; 
+    border-bottom: 1px solid grey;
+  }
+}

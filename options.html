@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-UK">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Procrastination Guard: Options</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <form>
+    <div class="row">
+      <div class="col-l pad">
+        <p>Always Block</p>
+      </div>
+      <div class="col-r pad">
+        <p>These sites will be blocked even outside of work mode.</p>
+      </div>
+      <div id="always"></div>
+      <div class="col-l pad">
+        <input type="text" id="newAlways"></input>
+      </div>
+      <div class="col-r pad padbottom">
+        <button id="alwaysAdd">Add</button>
+      </div>
+      <div class="col-f"></div>
+      <div class="col-l pad">
+        <p>Block Mode</p>
+      </div>
+      <div class="col-r padradio">
+        <input id="blockMode" name="mode" type="radio" checked>Block Specified</input>
+        <input id="allowMode" name="mode" type="radio">Allow Only Specified</input>
+      </div>
+      <div class="col-f"></div>
+      <div class="col-l pad">
+        <p>Conditionally Block</p>
+      </div>
+      <div class="col-r pad">
+        <div id="modeDetail"></div>
+      </div>
+      <div id="conditional"></div>
+      <div class="col-l pad">
+        <input type="text" id="newConditional"></input>
+      </div>
+      <div class="col-r pad padbottom">
+        <button id="conditionalAdd">Add</button>
+      </div>
+      <div class="col-f"></div>
+      <div class="col-f padall">
+        <button id="saveButton">Save</button>
+      </div>
+    </div>
+  </form>
+  
+  <script src="options.js"></script>
+
+</body>
