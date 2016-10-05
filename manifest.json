@@ -33,6 +33,7 @@
     "notifications",
     "storage",
     "webRequest",
-    "webRequestBlocking"
+    "webRequestBlocking",
+    "<all_urls>"
   ]
 }

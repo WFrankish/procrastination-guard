@@ -166,7 +166,7 @@ function startBlocking(){
   chrome.browserAction.onClicked.removeListener(startBlocking);
   chrome.browserAction.onClicked.addListener(wontStopNotification);
   chrome.browserAction.setTitle({ 
-    title: "Procrastination Guard - Disable work mode"
+    title: "Procrastination Guard - Work mode enabled"
   });
   chrome.browserAction.setIcon({ path: {
     "16": "button/icon-16.png",
