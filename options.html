@@ -11,11 +11,12 @@
 <body>
   <form>
     <div class="row">   
-      <div class="col-f"></div>     
+      <div class="col-f"></div>
+      <input type = "button" id="go"></input>
       <div class="col-f">
         <p>
           Rules should be of the form website.domain, or website.domain/sub-page.</br>
-          Rules will apply to all sites of the form *://*.[rule]/* where * matches anything.
+          Rules will apply to all sites of the form <m>*://*.[rule]/*</m> where <m>*</m> matches anything.
         </p>
       </div>
       <div class="col-l pad">
@@ -36,8 +37,10 @@
         <p>Block Mode</p>
       </div>
       <div class="col-r padradio">
-        <input id="blockMode" name="mode" type="radio" checked>Block Specified</input>
-        <input id="allowMode" name="mode" type="radio">Allow Only Specified</input>
+        <input id="blockMode" name="mode" type="radio" checked></input>
+        <label for="blockMode"><span><span></span></span>Block Specified</label>
+        <input id="allowMode" name="mode" type="radio"></input>
+        <label for="allowMode"><span><span></span></span>Allow Only Specified</label>
       </div>
       <div class="col-f"></div>
       <div class="col-l pad">

@@ -19,14 +19,18 @@ var alwaysList;
 var blockList;
 var allowList;
 
-
 // initialisation
 init();
 
 function init(){
   load(null, null, true);
   chrome.storage.onChanged.addListener(load);
-  chrome.webRequest.onBeforeRequest.addListener(shouldBlock, { urls : ["<all_urls>"], types : ["main_frame"] }, ["blocking"]);
+  chrome.webRequest.onBeforeRequest.addListener(shouldBlock, 
+    {
+      urls : ["<all_urls>"],
+      types : ["main_frame"]
+    }, ["blocking"]);
+  chrome.browserAction.onClicked.addListener(startBlocking);
 }
 
 // load storage (also used as event for storage, so ignore first two arguments)
@@ -59,7 +63,7 @@ function load(event, scope, isInitial){
       }
       blockList = [];
       for(var i in block){
-        if(isInital){
+        if(isInitial){
           blockTemp[i] = false;
         }
         if(!blockTemp[i]){
@@ -122,6 +126,8 @@ function matchAny(matchList, url){
   return null;
 }
 
+// given detail from a request sent event, determine whether the url should be 
+// blocked or not, creating a notification if it should
 function shouldBlock(detail){
   var message;
   if(running){
@@ -130,7 +136,7 @@ function shouldBlock(detail){
       if(message == null){
         chrome.notifications.create("blockNotification", {
           "type": "basic",
-          "iconUrl": chrome.extension.getURL("icons/icon-48.png"),
+          "iconUrl": chrome.extension.getURL("icons/icon-96.png"),
           "title": "Procrastination Guard blocked a website!",
           "message": `${ detail.url } does not match any rules on the allow list`,
         });
@@ -148,10 +154,49 @@ function shouldBlock(detail){
   if(message != null){
     chrome.notifications.create("blockNotification", {
       "type": "basic",
-      "iconUrl": chrome.extension.getURL("icons/icon-48.png"),
+      "iconUrl": chrome.extension.getURL("icons/icon-96.png"),
       "title": "Procrastination Guard blocked a website!",
       "message": message
     });
   }
   return { cancel: message != null };
+}
+
+function startBlocking(){
+  chrome.browserAction.onClicked.removeListener(startBlocking);
+  chrome.browserAction.onClicked.addListener(wontStopNotification);
+  chrome.browserAction.setTitle({ 
+    title: "Procrastination Guard - Disable work mode"
+  });
+  chrome.browserAction.setIcon({ path: {
+    "16": "button/icon-16.png",
+    "32": "button/icon-32.png",
+    "64": "button/icon-64.png",
+    "256": "button/icon-256.png"
+  }})
+  running = true;
+}
+
+function stopBlocking(){
+  chrome.browserAction.onClicked.removeListener(wontStopNotification);
+  chrome.browserAction.onClicked.addListener(startBlocking);
+    chrome.browserAction.setTitle({ 
+    title: "Procrastination Guard - Enable work mode"
+  });
+  chrome.browserAction.setIcon({ path: {
+    "16": "button/icon_d-16.png",
+    "32": "button/icon_d-32.png",
+    "64": "button/icon_d-64.png",
+    "256": "button/icon_d-256.png"
+  }})
+  running = false;
+}
+
+function wontStopNotification(){
+  chrome.notifications.create("wontStopNotification", {
+    "type": "basic",
+    "iconUrl": chrome.extension.getURL("icons/icon-96.png"),
+    "title": "Are you sure you're done working?",
+    "message": "If so, go to the options page to turn off work mode."
+  });
 }

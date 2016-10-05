@@ -12,6 +12,7 @@ var blockTemp;
 var allowTemp;
 
 // DOM objects
+var goButton;
 var blockModeSwitch;
 var allowModeSwitch;
 var alwaysDiv;
@@ -39,6 +40,7 @@ function saveOptions(){
 
 // load variables from storage
 function restoreOptions(){
+  goButton = document.getElementById("go");
   blockModeSwitch = document.getElementById("blockMode");
   allowModeSwitch = document.getElementById("allowMode");
   alwaysDiv = document.getElementById("always");
@@ -68,6 +70,7 @@ function restoreOptions(){
     if(res != null && Array.isArray(res.allow)){
       allow = res.allow;
     } else {
+      console.log(res);
       allow = [];
     }
   });
@@ -81,6 +84,13 @@ function restoreOptions(){
     allowTemp = page.allowTemp;
     populateAlways();
     populateConditional(inBlockOnlyMode);
+    if(!page.running){
+      goButton.value = "Start Work Mode";
+      goButton.onclick = startStop;
+    } else {
+      goButton.value = "Stop Work Mode";
+      goButton.onclick = startStop;
+    }
   });
 }
 
@@ -100,6 +110,19 @@ function switchMode(toBlockMode){
     modeDetailDiv.innerHTML = 
       "<p>Only these sites will be allowed during work mode.</p>";
   }
+}
+
+// start or stop running
+function startStop(){
+  chrome.runtime.getBackgroundPage((page) => {
+    if(!page.running){
+      page.startBlocking();
+      goButton.value = "Stop Work Mode";
+    } else {
+      page.stopBlocking();
+      goButton.value = "Start Work Mode";
+    }
+  });
 }
 
 // switch to a block list and save

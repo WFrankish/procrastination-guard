@@ -12,10 +12,10 @@
   "browser_action": {
     "default_title": "Procrastination Guard - Enable work mode",
     "default_icon": {
-      "16": "button/icon-16.png",
-      "32": "button/icon-32.png",
-      "64": "button/icon-64.png",
-      "256": "button/icon-256".png"
+      "16": "button/icon_d-16.png",
+      "32": "button/icon_d-32.png",
+      "64": "button/icon_d-64.png",
+      "256": "button/icon_d-256.png"
     }
   },
   
