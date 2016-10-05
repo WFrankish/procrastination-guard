@@ -1,10 +1,17 @@
 "use strict"
 
-var inBlockOnlyMode = true;
-var always = [];
-var block = [];
-var allow = [];
+// stored variables
+var inBlockOnlyMode;
+var always;
+var block;
+var allow;
 
+// which rules are temporarily disables
+var alwaysTemp;
+var blockTemp;
+var allowTemp;
+
+// DOM objects
 var blockModeSwitch;
 var allowModeSwitch;
 var alwaysDiv;
@@ -16,6 +23,10 @@ var newConditionalBox;
 var addConditionalButton;
 var saveButton;
 
+// initialisation
+document.addEventListener('DOMContentLoaded', restoreOptions);
+
+// save variables to storage
 function saveOptions(){
   chrome.storage.local.set({
     inBlockOnlyMode : inBlockOnlyMode,
@@ -26,8 +37,8 @@ function saveOptions(){
   restoreOptions();
 }
 
+// load variables from storage
 function restoreOptions(){
-  console.log("reloaded");
   blockModeSwitch = document.getElementById("blockMode");
   allowModeSwitch = document.getElementById("allowMode");
   alwaysDiv = document.getElementById("always");
@@ -40,25 +51,40 @@ function restoreOptions(){
   addConditionalButton = document.getElementById("conditionalAdd");
   addConditionalButton.onclick = addToConditional;
   chrome.storage.local.get("always", (res) => {
-    if(res != null){
+    if(res != null && Array.isArray(res.always)){
       always = res.always;
+    } else {
+      always = [];
     }
   });
   chrome.storage.local.get("block", (res) => {
-    if(res != null){
+    if(res != null && Array.isArray(res.block)){
       block = res.block;
+    } else {
+      block = [];
     }
   });
   chrome.storage.local.get("allow", (res) => {
-    if(res != null){
+    if(res != null && Array.isArray(res.allow)){
       allow = res.allow;
+    } else {
+      allow = [];
     }
   });
   chrome.storage.local.get("inBlockOnlyMode", (res) => {
     switchMode(res == null || res.inBlockOnlyMode);
   });
+  
+  chrome.runtime.getBackgroundPage((page) => {
+    alwaysTemp = page.alwaysTemp;
+    blockTemp = page.blockTemp;
+    allowTemp = page.allowTemp;
+    populateAlways();
+    populateConditional(inBlockOnlyMode);
+  });
 }
 
+// switch between using a block list and an allow list
 function switchMode(toBlockMode){
   inBlockOnlyMode = toBlockMode;
   if(toBlockMode){
@@ -74,24 +100,38 @@ function switchMode(toBlockMode){
     modeDetailDiv.innerHTML = 
       "<p>Only these sites will be allowed during work mode.</p>";
   }
-  populateAlways();
-  populateConditional(inBlockOnlyMode);
 }
 
+// switch to a block list and save
 function switchToBlock(){
   switchMode(true);
   saveOptions();
 }
 
+// switch to an allow list and save
 function switchToAllow(){
   switchMode(false);
   saveOptions();
 }
 
+// create the new html for an item on the list
+function newHTML(ch, rule, i, inactive){
+  var result = '<div class="col-l pad">' + rule + '</div>';
+  result += '<div class="col-r pad"><input type="button" id="switch' + ch + i;
+  if(inactive){
+    result += '" value="Reenable"></input><input type="button" ';
+  } else {
+    result += '" value="Disable for session"></input><input type="button" ';
+  }
+  result += 'id="delete' + ch + i + '" value="Delete"></input></div>';
+  return result;
+}
+
+// populate the always list on screen
 function populateAlways(){
   var innerHTML = "";
   for(var i in always){
-    innerHTML += newAlwaysHTML(always[i].rule, i);
+    innerHTML += newHTML('A', always[i], i, alwaysTemp[i]);
   }
   alwaysDiv.innerHTML = innerHTML;
   for(var i in always){
@@ -99,47 +139,50 @@ function populateAlways(){
   }
 }
 
-function newAlwaysHTML(string, i){
-  var result = '<div class="col-l pad">' + string + '</div>';
-  result += '<div class="col-r pad"><input type="button" id="allowA' + i;
-  result += '" value="Allow for session"></input><input type="button" ';
-  result += 'id="deleteA' + i + '" value="Delete"></input></div>';
-  return result;
-}
 
+// add functions to the buttons of the always list
 function makeAlwaysButtons(i){
-  var allowButton = document.getElementById("allowA"+i);
+  var allowButton = document.getElementById("switchA"+i);
   allowButton.onclick = function(){
-    always[i].tempAllow = true;
+    chrome.runtime.getBackgroundPage((page) => {
+      page.alwaysTemp[i] = !page.alwaysTemp[i];
+      page.repopulate();
+      saveOptions();
+    });
   }
   var deleteButton = document.getElementById("deleteA"+i);
   deleteButton.onclick = function(){
     always.splice(i, 1);
-    saveOptions();
+    chrome.runtime.getBackgroundPage((page) => {
+      page.alwaysTemp.splice(i, 1);
+      saveOptions();
+    });
   }
 }
 
+// add a new rule to the always list
 function addToAlways(){
   if(newAlwaysBox.value.length > 0){
     var newRule = newAlwaysBox.value;
-    always.push({
-        rule : newRule,
-        tempAllow : false,
+    always.push(newRule);
+    chrome.runtime.getBackgroundPage((page) => {
+      page.alwaysTemp.push(false);
     });
     saveOptions();
   }
   newAlwaysBox.value = "";
 }
 
+// populate the allow or block list on screen
 function populateConditional(showBlockList){
   var innerHTML = "";
   if(inBlockOnlyMode){
     for(var i in block){
-      innerHTML += newBlockHTML(block[i].rule, i);
+      innerHTML += newHTML('B', block[i], i, blockTemp[i]);
     }
   } else {
     for(var i in allow){
-      innerHTML += newAllowHTML(allow[i].rule, i);
+      innerHTML += newHTML('C', allow[i], i, allowTemp[i]);
     }
   }
   conditionalDiv.innerHTML = innerHTML;
@@ -154,65 +197,61 @@ function populateConditional(showBlockList){
   }
 }
 
-function newBlockHTML(string, i){
-  var result = '<div class="col-l pad">' + string + '</div>';
-  result += '<div class="col-r pad"><input type="button" id="allowB' + i;
-  result += '" value="Allow for session"></input><input type="button" ';
-  result += 'id="deleteB' + i + '" value="Delete"></input></div>';
-  return result;
-}
-
+// add functions to the buttons on the block list
 function makeBlockButtons(i){
-  var allowButton = document.getElementById("allowB"+i);
+  var allowButton = document.getElementById("switchB"+i);
   allowButton.onclick = function(){
-    block[i].tempAllow = true;
+    chrome.runtime.getBackgroundPage((page) => {
+      page.blockTemp[i] = !page.blockTemp[i];
+      page.repopulate();
+      saveOptions();
+    });
   }
   var deleteButton = document.getElementById("deleteB"+i);
   deleteButton.onclick = function(){
     block.splice(i, 1);
-    saveOptions();
+    chrome.runtime.getBackgroundPage((page) => {
+      page.blockTemp.splice(i, 1);
+      saveOptions();
+    });
   }
 }
 
-function newAllowHTML(string, i){
-  var result = '<div class="col-l pad">' + string + '</div>';
-  result += '<div class="col-r pad"><input type="button" id="ban' + i;
-  result += '" value="Ban for session"></input><input type="button" ';
-  result += 'id="deleteC' + i + '" value="Delete"></input></div>';
-  return result;
-}
-
+// add functions to the buttons on the allow list
 function makeAllowButtons(i){
-  var banButton = document.getElementById("ban"+i);
+  var banButton = document.getElementById("switchC"+i);
   banButton.onclick = function(){
-    allow[i].tempBan = true;
+    chrome.runtime.getBackgroundPage((page) => {
+      page.allowTemp[i] = !page.allowTemp[i];
+      page.repopulate();
+      saveOptions();
+    });
   }
   var deleteButton = document.getElementById("deleteC"+i);
   deleteButton.onclick = function(){
     allow.splice(i, 1);
-    saveOptions();
+    chrome.runtime.getBackgroundPage((page) => {
+      page.allowTemp.splice(i, 1);
+      saveOptions();
+    });
   }
 }
 
+// add a new rule to either the allow list or block list
 function addToConditional(){
   if(newConditionalBox.value.length > 0){
     if(inBlockOnlyMode){
-      var newRule = newConditionalBox.value;
-      block.push({
-          rule : newRule,
-          tempAllow : false,
+      block.push(newConditionalBox.value);
+      chrome.runtime.getBackgroundPage((page) => {
+        page.blockTemp.push(false);
       });
-      saveOptions();
     } else {
-      var newRule = newConditionalBox.value;
-      allow.push({
-          rule : newRule,
-          tempBan : false,
+      allow.push(newConditionalBox.value);
+      chrome.runtime.getBackgroundPage((page) => {
+        page.allowTemp.push(false);
       });
-      saveOptions();
     }
   }
+  saveOptions();
   newConditionalBox.value = "";
 }
-
-document.addEventListener('DOMContentLoaded', restoreOptions);
