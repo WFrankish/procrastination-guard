@@ -14,13 +14,15 @@
     "default_icon": {
       "16": "button/icon-16.png",
       "32": "button/icon-32.png",
-      "64": "button/icon-64.png"
+      "64": "button/icon-64.png",
+      "256": "button/icon-256".png"
     }
   },
   
   "icons": {
   "48": "icons/icon-48.png",
-  "96": "icons/icon-96.png"
+  "96": "icons/icon-96.png",
+  "192": "icons/icon-192.png"
   },
   
   "options_ui": {
