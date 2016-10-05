@@ -10,7 +10,17 @@
   },
   
   "browser_action": {
-    "default_title": "Procrastination Guard - Enable work mode"
+    "default_title": "Procrastination Guard - Enable work mode",
+    "default_icon": {
+      "16": "button/icon-16.png",
+      "32": "button/icon-32.png",
+      "64": "button/icon-64.png"
+    }
+  },
+  
+  "icons": {
+  "48": "icons/icon-48.png",
+  "96": "icons/icon-96.png"
   },
   
   "options_ui": {
@@ -18,8 +28,8 @@
   },
   
   "permissions": [
+    "notifications",
     "storage",
-    "tabs",
     "webRequest",
     "webRequestBlocking"
   ]

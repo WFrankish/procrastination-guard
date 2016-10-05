@@ -1,5 +1,4 @@
 "use strict"
-Cu.import("resource://gre/modules/MatchPattern.jsm");
 
 // whether the program is running it's block or allow lists
 var running = false;
@@ -27,7 +26,7 @@ init();
 function init(){
   load(null, null, true);
   chrome.storage.onChanged.addListener(load);
-  chrome.webRequest.onBeforeRequest.addListener(shouldBlock, { urls : ["<all_urls>"] }, ["blocking"]);
+  chrome.webRequest.onBeforeRequest.addListener(shouldBlock, { urls : ["<all_urls>"], types : ["main_frame"] }, ["blocking"]);
 }
 
 // load storage (also used as event for storage, so ignore first two arguments)
@@ -117,22 +116,42 @@ function repopulate(){
 function matchAny(matchList, url){
   for(var i in matchList){
     if(url.match(matchList[i])){
-      return true;
+      return `${ url } was blocked by rule ${ matchList[i] }`;
     }
   }
-  return false;
+  return null;
 }
 
 function shouldBlock(detail){
-  var result;
+  var message;
   if(running){
-    if(inBlockOnlyMode){
-      result = matchAny(alwaysList, detail.url) || matchAny(blockList, detail.url);
+    if(!inBlockOnlyMode){
+      message = matchAny(allowList, detail.url);
+      if(message == null){
+        chrome.notifications.create("blockNotification", {
+          "type": "basic",
+          "iconUrl": chrome.extension.getURL("icons/icon-48.png"),
+          "title": "Procrastination Guard blocked a website!",
+          "message": `${ detail.url } does not match any rules on the allow list`,
+        });
+      }
+      return { cancel: message == null };
     } else {
-      result = !matchAny(allowList, detail.url);
+      message = matchAny(alwaysList, detail.url) 
+      if(message == null){
+        message = matchAny(blockList, detail.url);
+      }
     }
   } else {
-    result = matchAny(alwaysList, detail.url);
+    message = matchAny(alwaysList, detail.url);
   }
-  return {cancel: result};
+  if(message != null){
+    chrome.notifications.create("blockNotification", {
+      "type": "basic",
+      "iconUrl": chrome.extension.getURL("icons/icon-48.png"),
+      "title": "Procrastination Guard blocked a website!",
+      "message": message
+    });
+  }
+  return { cancel: message != null };
 }
