@@ -6,26 +6,13 @@ var always;
 var block;
 var allow;
 
-// which rules are temporarily disables
+// which rules are temporarily disabled
 var alwaysTemp;
 var blockTemp;
 var allowTemp;
 
-// DOM objects
-var goButton;
-var blockModeSwitch;
-var allowModeSwitch;
-var alwaysDiv;
-var newAlwaysBox;
-var addAlwaysButton;
-var modeDetailDiv;
-var conditionalDiv;
-var newConditionalBox;
-var addConditionalButton;
-var saveButton;
-
 // initialisation
-document.addEventListener('DOMContentLoaded', restoreOptions);
+$(document).ready(restoreOptions);
 
 // save variables to storage
 function saveOptions(){
@@ -40,18 +27,10 @@ function saveOptions(){
 
 // load variables from storage
 function restoreOptions(){
-  goButton = document.getElementById("go");
-  blockModeSwitch = document.getElementById("blockMode");
-  allowModeSwitch = document.getElementById("allowMode");
-  alwaysDiv = document.getElementById("always");
-  newAlwaysBox = document.getElementById("newAlways");
-  addAlwaysButton = document.getElementById("alwaysAdd");
-  addAlwaysButton.onclick = addToAlways;
-  modeDetailDiv = document.getElementById("modeDetail");
-  conditionalDiv = document.getElementById("conditional");
-  newConditionalBox = document.getElementById("newConditional");
-  addConditionalButton = document.getElementById("conditionalAdd");
-  addConditionalButton.onclick = addToConditional;
+  $("#addAlwaysButton").unbind("click");
+  $("#addAlwaysButton").click(addToAlways);
+  $("#addConditionalButton").unbind("click");
+  $("#addConditionalButton").click(addToConditional);
   chrome.storage.local.get("always", (res) => {
     if(res != null && Array.isArray(res.always)){
       always = res.always;
@@ -77,7 +56,6 @@ function restoreOptions(){
   chrome.storage.local.get("inBlockOnlyMode", (res) => {
     switchMode(res == null || res.inBlockOnlyMode);
   });
-  
   chrome.runtime.getBackgroundPage((page) => {
     alwaysTemp = page.alwaysTemp;
     blockTemp = page.blockTemp;
@@ -85,12 +63,12 @@ function restoreOptions(){
     populateAlways();
     populateConditional(inBlockOnlyMode);
     if(!page.running){
-      goButton.value = "Start Work Mode";
-      goButton.onclick = startStop;
+      $("#startStopButton").val("Start Work Mode");
     } else {
-      goButton.value = "Stop Work Mode";
-      goButton.onclick = startStop;
+      $("#startStopButton").val("Stop Work Mode");
     }
+    $("#startStopButton").unbind("click");
+    $("#startStopButton").click(startStop);
   });
 }
 
@@ -98,31 +76,18 @@ function restoreOptions(){
 function switchMode(toBlockMode){
   inBlockOnlyMode = toBlockMode;
   if(toBlockMode){
-    blockModeSwitch.click();
-    blockModeSwitch.onchange = undefined;
-    allowModeSwitch.onchange = switchToAllow;
-    modeDetailDiv.innerHTML = 
-      "<p>These sites will be blocked during work mode.</p>";
+    $("#blockModeRadio").click();
+    $("#blockModeRadio").change(undefined);
+    $("#allowModeRadio").change(switchToAllow);
+    $("#modeDetail").text( 
+      "These sites will be blocked during work mode.");
   } else {
-    allowModeSwitch.click();
-    allowModeSwitch.onchange = undefined;
-    blockModeSwitch.onchange = switchToBlock;
-    modeDetailDiv.innerHTML = 
-      "<p>Only these sites will be allowed during work mode.</p>";
+    $("#allowModeRadio").click();
+    $("#allowModeRadio").change(undefined);
+    $("#blockModeRadio").change(switchToBlock);
+    $("#modeDetail").text( 
+      "Only these sites will be allowed during work mode.");
   }
-}
-
-// start or stop running
-function startStop(){
-  chrome.runtime.getBackgroundPage((page) => {
-    if(!page.running){
-      page.startBlocking();
-      goButton.value = "Stop Work Mode";
-    } else {
-      page.stopBlocking();
-      goButton.value = "Start Work Mode";
-    }
-  });
 }
 
 // switch to a block list and save
@@ -137,26 +102,53 @@ function switchToAllow(){
   saveOptions();
 }
 
+// start or stop running
+function startStop(){
+  chrome.runtime.getBackgroundPage((page) => {
+    if(!page.running){
+      page.startBlocking();
+      $("#startStopButton").val("Stop Work Mode");
+    } else {
+      page.stopBlocking();
+      $("#startStopButton").val("Start Work Mode");
+    }
+  });
+}
+
+// when started via the browser action, update the options page
+function updateStartStop(toStart){
+  if(toStart){
+    $("#startStopButton").val("Stop Work Mode");
+  } else {
+    $("#startStopButton").val("Start Work Mode");
+  }
+}
+
 // create the new html for an item on the list
 function newHTML(ch, rule, i, inactive){
-  var result = '<div class="col-l pad">' + rule + '</div>';
-  result += '<div class="col-r pad"><input type="button" id="switch' + ch + i;
+  var result = [];
+  result[0] = $("<div>").addClass("col-l").addClass("pad").text(rule);
+  result[1] = $("<div>").addClass("col-r").addClass("pad");
+  result[1].html($("<input>").attr("type", "button")
+    .attr("id", `delete${ch}${i}`).val("Delete"));
+  var button = $("<input type='button'>").attr("type", "button")
+    .attr("id", `switch${ch}${i}`)
   if(inactive){
-    result += '" value="Reenable"></input><input type="button" ';
+    button.val("Reenable");
   } else {
-    result += '" value="Disable for session"></input><input type="button" ';
+    button.val("Disable for session")
   }
-  result += 'id="delete' + ch + i + '" value="Delete"></input></div>';
+  result[1].append(button);
   return result;
 }
 
 // populate the always list on screen
 function populateAlways(){
-  var innerHTML = "";
+  var newButtons = [];
   for(var i in always){
-    innerHTML += newHTML('A', always[i], i, alwaysTemp[i]);
+    newButtons = newButtons.concat(newHTML('A', always[i], i, alwaysTemp[i]));
   }
-  alwaysDiv.innerHTML = innerHTML;
+  $("#always").html(newButtons);
   for(var i in always){
     makeAlwaysButtons(i)
   }
@@ -165,50 +157,48 @@ function populateAlways(){
 
 // add functions to the buttons of the always list
 function makeAlwaysButtons(i){
-  var allowButton = document.getElementById("switchA"+i);
-  allowButton.onclick = function(){
+  $(`#switchA${ i }`).click(function(){
     chrome.runtime.getBackgroundPage((page) => {
       page.alwaysTemp[i] = !page.alwaysTemp[i];
       page.repopulate();
       saveOptions();
     });
-  }
-  var deleteButton = document.getElementById("deleteA"+i);
-  deleteButton.onclick = function(){
+  });
+  $(`#deleteA${ i }`).click(function(){
     always.splice(i, 1);
     chrome.runtime.getBackgroundPage((page) => {
       page.alwaysTemp.splice(i, 1);
       saveOptions();
     });
-  }
+  });
 }
 
 // add a new rule to the always list
 function addToAlways(){
-  if(newAlwaysBox.value.length > 0){
-    var newRule = newAlwaysBox.value;
+  var newRule = $("#newAlwaysText").val();
+  if(newRule.length > 0){
     always.push(newRule);
     chrome.runtime.getBackgroundPage((page) => {
       page.alwaysTemp.push(false);
     });
     saveOptions();
   }
-  newAlwaysBox.value = "";
+  $("#newAlwaysText").val("");
 }
 
 // populate the allow or block list on screen
 function populateConditional(showBlockList){
-  var innerHTML = "";
+  var newButtons = [];
   if(inBlockOnlyMode){
     for(var i in block){
-      innerHTML += newHTML('B', block[i], i, blockTemp[i]);
+      newButtons = newButtons.concat(newHTML('B', block[i], i, blockTemp[i]));
     }
   } else {
     for(var i in allow){
-      innerHTML += newHTML('C', allow[i], i, allowTemp[i]);
+      newButtons = newButtons.concat(newHTML('C', allow[i], i, allowTemp[i]));
     }
   }
-  conditionalDiv.innerHTML = innerHTML;
+  $("#conditional").html(newButtons);
   if(inBlockOnlyMode){
     for(var i in block){
       makeBlockButtons(i)
@@ -222,59 +212,56 @@ function populateConditional(showBlockList){
 
 // add functions to the buttons on the block list
 function makeBlockButtons(i){
-  var allowButton = document.getElementById("switchB"+i);
-  allowButton.onclick = function(){
+  $(`#switchB${ i }`).click(function(){
     chrome.runtime.getBackgroundPage((page) => {
       page.blockTemp[i] = !page.blockTemp[i];
       page.repopulate();
       saveOptions();
     });
-  }
-  var deleteButton = document.getElementById("deleteB"+i);
-  deleteButton.onclick = function(){
+  });
+  $(`#deleteB${ i }`).click(function(){
     block.splice(i, 1);
     chrome.runtime.getBackgroundPage((page) => {
       page.blockTemp.splice(i, 1);
       saveOptions();
     });
-  }
+  });
 }
 
 // add functions to the buttons on the allow list
 function makeAllowButtons(i){
-  var banButton = document.getElementById("switchC"+i);
-  banButton.onclick = function(){
+  $(`#switchC${ i }`).click(function(){
     chrome.runtime.getBackgroundPage((page) => {
       page.allowTemp[i] = !page.allowTemp[i];
       page.repopulate();
       saveOptions();
     });
-  }
-  var deleteButton = document.getElementById("deleteC"+i);
-  deleteButton.onclick = function(){
+  });
+  $(`#deleteC${ i }`).click(function(){
     allow.splice(i, 1);
     chrome.runtime.getBackgroundPage((page) => {
       page.allowTemp.splice(i, 1);
       saveOptions();
     });
-  }
+  });
 }
 
 // add a new rule to either the allow list or block list
 function addToConditional(){
-  if(newConditionalBox.value.length > 0){
+  var newRule = $("#newConditionalText").val();
+  if(newRule.length > 0){
     if(inBlockOnlyMode){
-      block.push(newConditionalBox.value);
+      block.push(newRule);
       chrome.runtime.getBackgroundPage((page) => {
         page.blockTemp.push(false);
       });
     } else {
-      allow.push(newConditionalBox.value);
+      allow.push(newRule);
       chrome.runtime.getBackgroundPage((page) => {
         page.allowTemp.push(false);
       });
     }
+    saveOptions();
   }
-  saveOptions();
-  newConditionalBox.value = "";
+  $("#newConditionalText").val("");
 }

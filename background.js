@@ -162,6 +162,7 @@ function shouldBlock(detail){
   return { cancel: message != null };
 }
 
+// enter work mode
 function startBlocking(){
   chrome.browserAction.onClicked.removeListener(startBlocking);
   chrome.browserAction.onClicked.addListener(wontStopNotification);
@@ -175,8 +176,15 @@ function startBlocking(){
     "256": "button/icon-256.png"
   }})
   running = true;
+  var views = chrome.extension.getViews();
+  for(var i in views){
+    if(views[i].location.toString().endsWith("options.html")){
+      views[i].updateStartStop(running);
+    }
+  }
 }
 
+// leave work mode
 function stopBlocking(){
   chrome.browserAction.onClicked.removeListener(wontStopNotification);
   chrome.browserAction.onClicked.addListener(startBlocking);
@@ -190,8 +198,15 @@ function stopBlocking(){
     "256": "button/icon_d-256.png"
   }})
   running = false;
+  var views = chrome.extension.getViews();
+  for(var i in views){
+    if(views[i].location.toString().endsWith("options.html")){
+      views[i].updateStartStop(running);
+    }
+  }
 }
 
+// notify the user when they attempt to enter work mode via the browser action
 function wontStopNotification(){
   chrome.notifications.create("wontStopNotification", {
     "type": "basic",

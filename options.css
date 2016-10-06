@@ -10,22 +10,28 @@
   float: left;
 }
 .pad{
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 0.625em;
+  padding-right: 0.625em;
 }
 .padbottom{
-  padding-bottom: 10px;
+  padding-bottom: 0.625em;
 }
 .padradio{
-  padding-top: 15px;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 0.625em;
+  padding-right: 0.625em;
+  padding-bottom: 0.625em;
+}
+@media only screen and (min-width: 600px) {
+  .padradio{
+    padding-top: 0.9375em;
+    padding-bottom: 0em;
+  }
 }
 .padall{
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 10px;
+  padding-top: 0.625em;
+  padding-left: 0.625em;
+  padding-right: 0.625em;
+  padding-bottom: 0.625em;
 }
 html {
   color: #333;
@@ -34,6 +40,7 @@ html {
 body{
   padding: 0;
   margin: 0;
+  font-size: 100%;
 }
 m{
   font-family: monospace;
@@ -42,25 +49,24 @@ m{
 [class*="col-"] {
   width: 100%;
 }
+.col-f {
+  border-bottom: 0.0625em solid #c1c1c1;
+}
 @media only screen and (min-width: 600px) {
   .col-l {width: 35%;}
   .col-r {width: 65%;}
-  .col-f {
-    width: 100%; 
-    border-bottom: 1px solid #c1c1c1;
-  }
 }
 input[type=button]{
-  letter-spacing: 0.8px;
+  letter-spacing: 0.05em;
   color: #333;
   background-color: #fbfbfb;
-  border-radius: 2px;
+  border-radius: 0.125em;
   border: 1px solid #c1c1c1;
-  padding: 3px;
-  min-width: 100px;
-  height: 28px;
-  font-size: 14px;
-  margin: 4px;
+  padding: 0.1875em;
+  min-width: 6.25em;
+  height: 1.85em;
+  font-size: 0.875em;
+  margin: 0.25em;
 }
 input[type=button]:hover{
   background-color: #ebebeb;
@@ -71,35 +77,35 @@ input[type=button]:active{
 input[type=text]{
   color: #333;
   background-color: #ffffff;
-  border-radius: 1px;
-  border: 1px solid #c1c1c1;
-  padding: 3px;
-  min-width: 100px;
-  height: 28px;
-  font-size: 14px;
-  margin: 4px;
+  border-radius: 0.0625em;
+  border: 0.0625em solid #c1c1c1;
+  padding: 0.1875em;
+  min-width: 6.25em;
+  height: 1.85em;
+  font-size: 0.875em;
+  margin: 0.25em;
 }
 input[type=text]:focus{
-  border: 1px solid #006b9d;
+  border: 0.0625em solid #006b9d;
 }
 input[type=radio]{
-  width : 40px;
+  width : 2.5em;
   margin : 0;
   padding : 0;
   opacity  : 0;
 }
 input[type=radio] + label{
   display      : inline-block;
-  margin-left  : -40px;
+  margin-left  : -1.5em;
   line-height  : 1.5em;
 }
 input[type=radio] + label > span{
   display : inline-block;
-  width : 22px;
-  height : 22px;
-  margin-right: 6px;
-  border : 1px solid #c1c1c1;
-  border-radius : 20px;
+  width : 1.375em;
+  height : 1.375em;
+  margin-right: 0.375em;
+  border : 0.0625em solid #c1c1c1;
+  border-radius : 1.25em;
   background : #ffffff;
   vertical-align : bottom;
 }
@@ -108,9 +114,9 @@ input[type=radio]:hover + label > span{
 }
 input[type=radio]:checked + label > span > span{
   display : block;
-  width : 12px;
-  height : 12px;
-  border-radius : 20px;
-  margin: 4px;
+  width : 0.75em;
+  height : 0.75em;
+  border-radius : 1.25em;
+  margin: 0.25em;
   background : #178ce5;
 }
