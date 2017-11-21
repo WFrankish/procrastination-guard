@@ -1,0 +1,13 @@
+{
+  "name": "procrastination-guard",
+  "version": "0.0.0",
+  "description": "procrastination-guard",
+  "main": "app.js",
+  "author": {
+    "name": "William Frankish"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.2.16",
+    "@types/node": "^6.0.87"
+  }
+}
