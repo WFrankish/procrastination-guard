@@ -1,38 +1,45 @@
-"use strict";
+﻿declare var chrome: any;
+
 // whether the program is running it's block or allow lists
-var running = false;
+var running : boolean = false;
+
 // stored data
-var inBlockOnlyMode;
-var always;
-var block;
-var allow;
+var inBlockOnlyMode : boolean;
+var always : string[];
+var block: string[];
+var allow: string[];
+
 // which rules are temporarily disabled;
-var alwaysTemp = [];
-var blockTemp = [];
-var allowTemp = [];
+var alwaysTemp: boolean[] = [];
+var blockTemp: boolean[] = [];
+var allowTemp: boolean[] = [];
+
 // list of rules to use;
-var alwaysList;
-var blockList;
-var allowList;
+var alwaysList: any[];
+var blockList: any[];
+var allowList: any[];
+
 // initialisation
 init();
-function init() {
+
+function init() : void {
     load(null, null, true);
     chrome.storage.onChanged.addListener(load);
-    chrome.webRequest.onBeforeRequest.addListener(shouldBlock, {
-        urls: ["<all_urls>"],
-        types: ["main_frame"]
-    }, ["blocking"]);
+    chrome.webRequest.onBeforeRequest.addListener(shouldBlock,
+        {
+            urls: ["<all_urls>"],
+            types: ["main_frame"]
+        }, ["blocking"]);
     chrome.browserAction.onClicked.addListener(startBlocking);
 }
+
 // load storage (also used as event for storage, so ignore first two arguments)
-function load(event, scope, isInitial) {
+function load(event: any, scope: any, isInitial: boolean): void {
     // get from web-extension storage
-    chrome.storage.local.get("always", function (res) {
+    chrome.storage.local.get("always", (res: any) => {
         if (res != null && Array.isArray(res.always)) {
             always = res.always;
-        }
-        else {
+        } else {
             // is no or corrupt stored data
             always = [];
         }
@@ -44,15 +51,14 @@ function load(event, scope, isInitial) {
                 alwaysTemp[i] = false;
             }
             if (!alwaysTemp[i]) {
-                alwaysList.push(always[i]);
+                alwaysList.push(always[i])
             }
         }
     });
-    chrome.storage.local.get("block", function (res) {
+    chrome.storage.local.get("block", (res: any) => {
         if (res != null && Array.isArray(res.block)) {
             block = res.block;
-        }
-        else {
+        } else {
             block = [];
         }
         blockList = [];
@@ -61,15 +67,14 @@ function load(event, scope, isInitial) {
                 blockTemp[i] = false;
             }
             if (!blockTemp[i]) {
-                blockList.push(block[i]);
+                blockList.push(block[i])
             }
         }
     });
-    chrome.storage.local.get("allow", function (res) {
+    chrome.storage.local.get("allow", (res: any) => {
         if (res != null && Array.isArray(res.allow)) {
             allow = res.allow;
-        }
-        else {
+        } else {
             allow = [];
         }
         allowList = [];
@@ -78,51 +83,53 @@ function load(event, scope, isInitial) {
                 allowTemp[i] = false;
             }
             if (!allowTemp[i]) {
-                allowList.push(allow[i]);
+                allowList.push(allow[i])
             }
         }
     });
-    chrome.storage.local.get("inBlockOnlyMode", function (res) {
+    chrome.storage.local.get("inBlockOnlyMode", (res: any) => {
         if (res != null && typeof (res.inBlockOnlyMode) == "boolean") {
             inBlockOnlyMode = res.inBlockOnlyMode;
-        }
-        else {
+        } else {
             inBlockOnlyMode = true;
         }
     });
 }
+
 // remake lists of enabled rules
-function repopulate() {
+function repopulate(): void {
     alwaysList = [];
     for (var i in always) {
         if (!alwaysTemp[i]) {
-            alwaysList.push(always[i]);
+            alwaysList.push(always[i])
         }
     }
     blockList = [];
     for (var i in block) {
         if (!blockTemp[i]) {
-            blockList.push(block[i]);
+            blockList.push(block[i])
         }
     }
     allowList = [];
     for (var i in allow) {
         if (!allowTemp[i]) {
-            allowList.push(allow[i]);
+            allowList.push(allow[i])
         }
     }
 }
-function matchAny(matchList, url) {
+
+function matchAny(matchList: any[], url: string) {
     for (var i in matchList) {
         if (url.match(matchList[i])) {
-            return url + " was blocked by rule " + matchList[i];
+            return `${url} was blocked by rule ${matchList[i]}`;
         }
     }
     return null;
 }
+
 // given detail from a request sent event, determine whether the url should be 
 // blocked or not, creating a notification if it should
-function shouldBlock(detail) {
+function shouldBlock(detail: any) {
     var message;
     if (running) {
         if (!inBlockOnlyMode) {
@@ -132,19 +139,17 @@ function shouldBlock(detail) {
                     "type": "basic",
                     "iconUrl": chrome.extension.getURL("icons/icon-96.png"),
                     "title": "Procrastination Guard blocked a website!",
-                    "message": detail.url + " does not match any rules on the allow list",
+                    "message": `${detail.url} does not match any rules on the allow list`,
                 });
             }
             return { cancel: message == null };
-        }
-        else {
-            message = matchAny(alwaysList, detail.url);
+        } else {
+            message = matchAny(alwaysList, detail.url)
             if (message == null) {
                 message = matchAny(blockList, detail.url);
             }
         }
-    }
-    else {
+    } else {
         message = matchAny(alwaysList, detail.url);
     }
     if (message != null) {
@@ -157,8 +162,9 @@ function shouldBlock(detail) {
     }
     return { cancel: message != null };
 }
+
 // enter work mode
-function startBlocking() {
+function startBlocking(): void {
     chrome.browserAction.onClicked.removeListener(startBlocking);
     chrome.browserAction.onClicked.addListener(wontStopNotification);
     chrome.browserAction.setTitle({
@@ -171,7 +177,7 @@ function startBlocking() {
             "64": "button/icon-64.png",
             "256": "button/icon-256.png"
         }
-    });
+    })
     running = true;
     var views = chrome.extension.getViews();
     for (var i in views) {
@@ -180,8 +186,9 @@ function startBlocking() {
         }
     }
 }
+
 // leave work mode
-function stopBlocking() {
+function stopBlocking(): void {
     chrome.browserAction.onClicked.removeListener(wontStopNotification);
     chrome.browserAction.onClicked.addListener(startBlocking);
     chrome.browserAction.setTitle({
@@ -194,7 +201,7 @@ function stopBlocking() {
             "64": "button/icon_d-64.png",
             "256": "button/icon_d-256.png"
         }
-    });
+    })
     running = false;
     var views = chrome.extension.getViews();
     for (var i in views) {
@@ -203,8 +210,9 @@ function stopBlocking() {
         }
     }
 }
+
 // notify the user when they attempt to enter work mode via the browser action
-function wontStopNotification() {
+function wontStopNotification(): void {
     chrome.notifications.create("wontStopNotification", {
         "type": "basic",
         "iconUrl": chrome.extension.getURL("icons/icon-96.png"),
