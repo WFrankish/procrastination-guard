@@ -1,11 +1,11 @@
 ﻿declare var chrome: any;
 
 // whether the program is running it's block or allow lists
-var running : boolean = false;
+var running: boolean = false;
 
 // stored data
-var inBlockOnlyMode : boolean;
-var always : string[];
+var inBlockOnlyMode: boolean;
+var always: string[];
 var block: string[];
 var allow: string[];
 
@@ -22,7 +22,7 @@ var allowList: any[];
 // initialisation
 init();
 
-function init() : void {
+function init(): void {
     load(null, null, true);
     chrome.storage.onChanged.addListener(load);
     chrome.webRequest.onBeforeRequest.addListener(shouldBlock,

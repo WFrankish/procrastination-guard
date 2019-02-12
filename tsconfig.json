@@ -1,15 +1,22 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "lib": ["es5"],
-    "sourceMap": false,
-    "alwaysStrict": true,
-    "strict": true,
-    "outDir": "./procrastination-guard"
-  },
-  "exclude": [
-    "node_modules"
-  ],
-  "compileOnSave": true
+    "compileOnSave": true,
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "outDir": "./",
+        "noFallthroughCasesInSwitch": true,
+        "strictPropertyInitialization": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "removeComments": true,
+        "sourceMap": false,
+        "strictNullChecks": true,
+        "target": "esnext",
+        "typeRoots": [
+            "node_modules/@types",
+            "node_modules/web-ext-types"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
 }

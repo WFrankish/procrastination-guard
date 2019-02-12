@@ -1,0 +1,17 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "*.png": true,
+            "**/.git": true,
+            "**/*.js": true,
+            "**/*.map": true,
+            "**/*.zip": true
+        },
+        "editor.detectIndentation": false
+    }
+}
