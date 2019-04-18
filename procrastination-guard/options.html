@@ -1,63 +1,71 @@
 <!DOCTYPE html>
 <html lang="en-UK">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Procrastination Guard: Options</title>
-  <link rel="stylesheet" href="options.css" />
-  <script src="jquery-3.1.1.min.js"></script>
-  <script src="options.js"></script>
+<head data-ng-csp>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Procrastination Guard: Options</title>
+    <link rel="stylesheet" href="options.css" />
+    <script src="lib/jquery-3.2.1.min.js"></script>
+    <script src="lib/angular.min.js"></script>
+    <script src="options.js"></script>
 </head>
 
 <body>
-  <form>
-    <div class="row">   
-      <div class="col-f"></div>
-      <div class="col-f pad">
-        <input type = "button" id="startStopButton"></input>
-        <p>
-          Rules should be of the form website.domain, or website.domain/sub-page.</br>
-          Rules will apply to all sites of the form <m>*://*.[rule]/*</m> where <m>*</m> matches anything.
-        </p>
-      </div>
-      <div class="col-l pad">
-        <p>Always Block</p>
-      </div>
-      <div class="col-r pad">
-        <p>These sites will be blocked even outside of work mode.</p>
-      </div>
-      <div id="always"></div>
-      <div class="col-l pad">
-        <input type="text" id="newAlwaysText"></input>
-      </div>
-      <div class="col-r pad padbottom">
-        <input type="button" id="addAlwaysButton" value="Add"></input>
-      </div>
-      <div class="col-f"></div>
-      <div class="col-l pad">
-        <p>Block Mode:</p>
-      </div>
-      <div class="col-r padradio">
-        <input id="blockModeRadio" name="mode" type="radio" checked></input>
-        <label for="blockModeRadio"><span><span></span></span>Block Specified</label>
-        <input id="allowModeRadio" name="mode" type="radio"></input>
-        <label for="allowModeRadio"><span><span></span></span>Allow Only Specified</label>
-      </div>
-      <div class="col-f"></div>
-      <div class="col-l pad">
-        <p>Conditionally Block:</p>
-      </div>
-      <div class="col-r pad">
-        <p id="modeDetail"></p>
-      </div>
-      <div id="conditional"></div>
-      <div class="col-l pad">
-        <input type="text" id="newConditionalText"></input>
-      </div>
-      <div class="col-r pad padbottom">
-        <input type="button" id="addConditionalButton" value="Add"></input>
-      </div>
+    <div data-ng-app="options" data-ng-controller="optionsCtrl">
+        <form>
+            <div class="row">
+                <div class="col-f"></div>
+                <div class="col-f pad">
+                    <input type="button" data-ng-click="startStop"></input>
+                    <p>
+                        Rules should be of the form website.domain, or website.domain/sub-page.</br>
+                        Rules will apply to all sites of the form <m>*://*.[rule]/*</m> where <m>*</m> matches anything.
+                    </p>
+                </div>
+                <div class="col-l pad">
+                    <p>Always Block</p>
+                </div>
+                <div class="col-r pad">
+                    <p>These sites will be blocked even outside of work mode.</p>
+                </div>
+                <div data-ng-repeat="entry in storage.always">
+                    <div class="col-l, pad">$entry.rule</div>
+                    <div class="col-r pad">
+                        <input type="button" val="Delete"/>
+                    </div>
+                </div>
+                <div class="col-l pad">
+                    <input type="text" id="newAlwaysText"></input>
+                </div>
+                <div class="col-r pad padbottom">
+                    <input type="button" id="addAlwaysButton" value="Add"></input>
+                </div>
+                <div class="col-f"></div>
+                <div class="col-l pad">
+                    <p>Block Mode:</p>
+                </div>
+                <div class="col-r padradio">
+                    <input id="blockModeRadio" name="mode" type="radio" checked></input>
+                    <label for="blockModeRadio"><span><span></span></span>Block Specified</label>
+                    <input id="allowModeRadio" name="mode" type="radio"></input>
+                    <label for="allowModeRadio"><span><span></span></span>Allow Only Specified</label>
+                </div>
+                <div class="col-f"></div>
+                <div class="col-l pad">
+                    <p>Conditionally Block:</p>
+                </div>
+                <div class="col-r pad">
+                    <p id="modeDetail"></p>
+                </div>
+                <div id="conditional"></div>
+                <div class="col-l pad">
+                    <input type="text" id="newConditionalText"></input>
+                </div>
+                <div class="col-r pad padbottom">
+                    <input type="button" id="addConditionalButton" value="Add"></input>
+                </div>
+            </div>
+        </form>
     </div>
-  </form>
 </body>

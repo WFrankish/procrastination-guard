@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/angular": "^1.6.54",
     "@types/jquery": "^3.3.29",
     "web-ext-types": "^3.1.0"
   }

@@ -1,16 +1,19 @@
-﻿$(initOptions);
-
-function initOptions() {
-    browser.runtime.getBackgroundPage().then((page: any) => {
-        var background = page.background;
-        var options = new Options(background);
-    });
-}
+﻿var options = angular.module("options", []);
+options.controller("optionsCtrl", $scope => {
+    var backgroundPage: any = browser.extension.getBackgroundPage();
+    var background: IBackground = backgroundPage.background;
+    var options = new Options(background);
+    $scope.storage = background.storage;
+    $scope.options = options;
+    $scope.addToAlways = () => options.addToAlways();
+    $scope.addToConditional = () => options.addToConditional();
+    $scope.startStop = () => options.startStop();
+    options.restoreOptions();
+});
 
 class Options implements IOptions {
-
     private readonly background: IBackground;
-    private readonly storage:  IStorage;
+    private readonly storage: IStorage;
 
     constructor(background: IBackground) {
         this.background = background;
@@ -18,19 +21,13 @@ class Options implements IOptions {
     }
 
     restoreOptions(): void {
-        $("#addAlwaysButton").unbind("click");
-        $("#addAlwaysButton").click(this.addToAlways);
-        $("#addConditionalButton").unbind("click");
-        $("#addConditionalButton").click(this.addToConditional);
         this.populateAlways();
-        this.populateConditional(this.background.storage.inBlockOnlyMode);
+        this.populateConditional(this.storage.inBlockOnlyMode);
         if (!this.background.isRunning) {
             $("#startStopButton").val("Start Work Mode");
         } else {
             $("#startStopButton").val("Stop Work Mode");
         }
-        $("#startStopButton").unbind("click");
-        $("#startStopButton").click(this.startStop);
     }
 
     // switch between using a block list and an allow list
@@ -65,15 +62,13 @@ class Options implements IOptions {
 
     // start or stop running
     startStop() {
-        browser.runtime.getBackgroundPage((page: any) => {
-            if (!page.running) {
-                page.startBlocking();
-                $("#startStopButton").val("Stop Work Mode");
-            } else {
-                page.stopBlocking();
-                $("#startStopButton").val("Start Work Mode");
-            }
-        });
+        if (!this.background.isRunning) {
+            this.background.startWorkMode();
+            $("#startStopButton").val("Stop Work Mode");
+        } else {
+            this.background.endWorkMode();
+            $("#startStopButton").val("Start Work Mode");
+        }
     }
 
     // when started via the browser action, update the options page
